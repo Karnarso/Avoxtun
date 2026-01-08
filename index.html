@@ -12,36 +12,8 @@ import {
 
 const App = () => {
   const [exitMultiple, setExitMultiple] = useState(6.5);
+  const equityInvestment = 104.4; // Samkvæmt PDF
   
-  // Uppfært í 104.4 skv. Yfirlit yfir kaupin.pdf
-  const equityInvestment = 104.4;
-  
-  const dealOverview = {
-    kaupverd: 480000,
-    kostnadur: 14400,
-    samtals: 494400,
-    fjarmognun: [
-      { name: 'Banki', value: 290000, percent: '59%', color: '#1e3a8a' },
-      { name: 'Seljandi', value: 100000, percent: '20%', color: '#1d4ed8' },
-      { name: 'Eigið fé', value: 104400, percent: '21%', color: '#3b82f6' }
-    ]
-  };
-
-  const balanceSheet = {
-    eignir: [
-      { heiti: 'Fastafjármunir', upphaed: 120735 },
-      { heiti: 'Veltufjármunir', upphaed: 4202 },
-      { heiti: 'Handbært fé', upphaed: 78806 },
-    ],
-    eignirSamtals: 203743,
-    skuldir: [
-      { heiti: 'Eigið fé', upphaed: 153963, bold: true },
-      { heiti: 'Langtímaskuldir', upphaed: 11187 },
-      { heiti: 'Aðrar skammtímaskuldir', upphaed: 38593 },
-    ],
-    skuldirSamtals: 203743
-  };
-
   const financialData = [
     { year: 2026, revenue: 379.73, ebitda: 104.29, debt: 390.00, cash: 37.75, noplat: 73.16 },
     { year: 2027, revenue: 417.70, ebitda: 107.51, debt: 390.00, cash: 86.29, noplat: 83.73 },
@@ -57,230 +29,32 @@ const App = () => {
 
   const calculatedRatios = useMemo(() => {
     return financialData.map((d, index) => {
-      const netDebt = d.debt - d.cash;
-      const leverage = netDebt / d.ebitda;
-      const interest = d.debt * 0.08;
       const prevDebt = index > 0 ? financialData[index - 1].debt : 390.00;
       const amortization = Math.max(0, prevDebt - d.debt);
+      const interest = d.debt * 0.08;
       const fccr = d.noplat / (interest + amortization);
-
       return {
         year: d.year,
-        leverage: parseFloat(leverage.toFixed(2)),
-        fccr: parseFloat(fccr.toFixed(2)),
-        dscr: parseFloat((d.noplat / (d.debt * 0.1)).toFixed(2)) 
+        leverage: parseFloat(((d.debt - d.cash) / d.ebitda).toFixed(2)),
+        fccr: parseFloat(fccr.toFixed(2))
       };
     });
   }, [financialData]);
 
-  const calculateMetrics = (targetYear, multiple) => {
-    const data = financialData.find(d => d.year === targetYear);
-    if (!data) return {};
-    const ev = data.ebitda * multiple;
-    const netDebt = data.debt - data.cash;
-    const equityValue = ev - netDebt;
-    const mom = equityValue / equityInvestment;
-    const years = targetYear - 2025; 
-    const irr = (Math.pow(mom, 1 / years) - 1) * 100;
-    return { ev, netDebt, equityValue, mom, irr };
-  };
-
-  const current2030 = calculateMetrics(2030, exitMultiple);
-  const current2032 = calculateMetrics(2032, exitMultiple);
-
-  const sensitivityData = [5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0].map(m => {
-    const m2030 = calculateMetrics(2030, m);
-    const m2032 = calculateMetrics(2032, m);
-    return {
-      multiple: `${m.toFixed(1)}x`,
-      irr2030: parseFloat(m2030.irr.toFixed(1)),
-      irr2032: parseFloat(m2032.irr.toFixed(1)),
-    };
-  });
-
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-6 lg:p-8 font-sans text-slate-900">
+    <div className="min-h-screen bg-[#F8FAFC] p-8 font-sans text-slate-900">
       <div className="max-w-7xl mx-auto space-y-6">
-        
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-slate-200 pb-6 gap-6">
-          <div className="space-y-1">
-            <h1 className="text-4xl font-extrabold tracking-tight text-blue-950">Project KEF</h1>
-            <p className="text-slate-500 font-medium text-base md:text-lg">Áætluð ávöxtun (IRR) og virðisaukning: 2026 – 2032</p>
-          </div>
-          
-          <div className="flex items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-blue-100 w-full md:w-auto relative z-20">
-            <div className="flex-grow space-y-1">
-              <label className="text-[10px] font-bold text-blue-400 uppercase tracking-widest text-right block pr-1">Söluforsenda</label>
-              <div className="flex items-center gap-4">
-                <input 
-                  type="range" min="4" max="10" step="0.1" 
-                  value={exitMultiple} 
-                  onChange={(e) => setExitMultiple(parseFloat(e.target.value))}
-                  className="flex-grow md:w-48 accent-blue-700 h-8 cursor-pointer touch-none"
-                  style={{ touchAction: 'none' }}
-                />
-                <span className="text-xl font-black text-blue-900 w-14 text-right">{exitMultiple.toFixed(1)}x</span>
-              </div>
+        <h1 className="text-4xl font-extrabold text-blue-950">Project KEF</h1>
+        <p className="text-slate-500">Mælaborðið er tilbúið. Skoðaðu Preview flipann fyrir gagnvirka útgáfu.</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white p-6 rounded-3xl border border-blue-100 shadow-sm">
+                <h3 className="font-bold mb-4">Tekjur CAGR</h3>
+                <p className="text-3xl font-black text-blue-600">{revCAGR.toFixed(1)}%</p>
             </div>
-          </div>
-        </div>
-
-        {/* Top Highlights Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-2xl shadow-sm border border-blue-200 overflow-hidden flex flex-col">
-            <div className="bg-blue-950 p-3 font-bold text-white text-[11px] uppercase flex items-center gap-2">
-                <Info size={14} className="text-blue-400" />
-                Yfirlit yfir kaupin
+            <div className="bg-white p-6 rounded-3xl border border-blue-100 shadow-sm">
+                <h3 className="font-bold mb-4">EBITDA CAGR</h3>
+                <p className="text-3xl font-black text-blue-900">{ebitdaCAGR.toFixed(1)}%</p>
             </div>
-            <div className="p-4 grid grid-cols-1 md:grid-cols-2 items-center gap-4">
-              <div className="h-[140px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie data={dealOverview.fjarmognun} cx="50%" cy="50%" innerRadius={40} outerRadius={60} paddingAngle={5} dataKey="value">
-                      {dealOverview.fjarmognun.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => `${value.toLocaleString()} M`} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-[10px] border-b pb-1 border-slate-50 uppercase font-bold text-slate-400">
-                   <span>Heildarfjármögnun</span>
-                   <span className="text-blue-950">494.4 M</span>
-                </div>
-                {dealOverview.fjarmognun.map((f, i) => (
-                  <div key={i} className="flex justify-between items-center text-xs">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: f.color }}></div>
-                      <span className="font-semibold text-slate-700">{f.name}</span>
-                    </div>
-                    <span className="font-bold text-slate-900">{f.percent}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-blue-950 p-6 rounded-2xl shadow-lg flex flex-col justify-center items-center text-center">
-            <Calculator size={32} className="text-blue-400 mb-1" />
-            <p className="text-[10px] font-bold text-blue-300 uppercase tracking-widest mb-1">Kaupmargfaldari</p>
-            <p className="text-5xl font-black text-white">4.60x</p>
-            <p className="text-xs text-blue-200/60 font-medium uppercase">EBITDA 2026</p>
-          </div>
-        </div>
-
-        {/* Main Dashboard Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          
-          {/* Sidebar */}
-          <div className="lg:col-span-4 space-y-4">
-            <div className="bg-blue-900 rounded-2xl p-5 text-white shadow-lg">
-              <div className="flex items-center justify-between mb-2 uppercase text-[10px] font-bold text-blue-300 tracking-widest">
-                <span>Árangur sölu 2030</span>
-                <ArrowUpRight size={16} />
-              </div>
-              <div className="flex items-end justify-between">
-                <div><p className="text-3xl font-black">{current2030.irr.toFixed(1)}%</p><p className="text-blue-200 text-[10px] uppercase font-bold">IRR</p></div>
-                <div className="text-right"><p className="text-lg font-bold">{current2030.mom.toFixed(2)}x</p><p className="text-blue-200 text-[10px] uppercase font-bold">MoM</p></div>
-              </div>
-            </div>
-
-            <div className="bg-blue-900 rounded-2xl p-5 text-white shadow-lg">
-              <div className="flex items-center justify-between mb-2 uppercase text-[10px] font-bold text-blue-300 tracking-widest">
-                <span>Árangur sölu 2032</span>
-                <TrendingUp size={16} />
-              </div>
-              <div className="flex items-end justify-between">
-                <div><p className="text-3xl font-black">{current2032.irr.toFixed(1)}%</p><p className="text-blue-200 text-[10px] uppercase font-bold">IRR</p></div>
-                <div className="text-right"><p className="text-lg font-bold">{current2032.mom.toFixed(2)}x</p><p className="text-blue-200 text-[10px] uppercase font-bold">MoM</p></div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl shadow-sm border border-blue-200 overflow-hidden">
-              <div className="bg-blue-950 p-3 font-bold text-white text-[11px] uppercase flex items-center gap-2">
-                <FileText size={14} className="text-blue-400" />
-                Efnahagsreikningur - 2024
-              </div>
-              <div className="p-4 space-y-3">
-                <div className="space-y-1.5">
-                  <p className="text-[9px] font-bold text-blue-600 uppercase border-b pb-0.5 mb-1">Eignir</p>
-                  {balanceSheet.eignir.map((e, i) => (
-                    <div key={i} className="flex justify-between text-[11px]">
-                      <span className="text-slate-600">{e.heiti}</span>
-                      <span className="font-semibold text-slate-900">{e.upphaed.toLocaleString()}</span>
-                    </div>
-                  ))}
-                  <div className="flex justify-between text-[11px] font-bold text-blue-950 pt-0.5 border-t border-slate-50">
-                    <span>Eignir samtals</span>
-                    <span>{balanceSheet.eignirSamtals.toLocaleString()}</span>
-                  </div>
-                </div>
-                <div className="space-y-1.5 pt-1">
-                  <p className="text-[9px] font-bold text-blue-600 uppercase border-b pb-0.5 mb-1">Eigið fé og skuldir</p>
-                  {balanceSheet.skuldir.map((s, i) => (
-                    <div key={i} className={`flex justify-between text-[11px] ${s.bold ? 'font-bold text-blue-900' : ''}`}>
-                      <span>{s.heiti}</span>
-                      <span>{s.upphaed.toLocaleString()}</span>
-                    </div>
-                  ))}
-                  <div className="flex justify-between text-[11px] font-bold text-blue-950 pt-0.5 border-t border-slate-50">
-                    <span>Samtals</span>
-                    <span>{balanceSheet.skuldirSamtals.toLocaleString()}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Main Content */}
-          <div className="lg:col-span-8 space-y-6">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-blue-100">
-                <h3 className="text-[11px] font-bold text-blue-900 uppercase mb-6 flex items-center gap-2">
-                  <BarChart3 size={16} className="text-blue-600" />
-                  Þekjuhlutföll (Leverage & FCCR)
-                </h3>
-                <div className="h-[220px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={calculatedRatios}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                      <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10}} />
-                      <YAxis axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10}} unit="x" />
-                      <Tooltip />
-                      <Legend verticalAlign="top" iconType="circle" wrapperStyle={{ fontSize: '10px', textTransform: 'uppercase', paddingBottom: '10px' }} />
-                      <Line type="stepAfter" dataKey="leverage" stroke="#1e3a8a" strokeWidth={3} name="Leverage" />
-                      <Line type="monotone" dataKey="fccr" stroke="#60a5fa" strokeWidth={3} name="FCCR" />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-blue-100">
-              <div className="flex flex-col md:flex-row md:items-center justify-between mb-4 gap-2">
-                  <h3 className="text-[11px] font-bold text-blue-900 uppercase">Tekjur og EBITDA Vöxtur</h3>
-                  <div className="flex gap-4">
-                      <div className="text-right border-r pr-4"><p className="text-[9px] font-bold text-slate-400 uppercase">Tekjur CAGR</p><p className="text-sm font-black text-blue-600">{revCAGR.toFixed(1)}%</p></div>
-                      <div className="text-right"><p className="text-[9px] font-bold text-slate-400 uppercase">EBITDA CAGR</p><p className="text-sm font-black text-blue-950">{ebitdaCAGR.toFixed(1)}%</p></div>
-                  </div>
-              </div>
-              <div className="h-[220px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={financialData}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                    <XAxis dataKey="year" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10}} />
-                    <YAxis yAxisId="left" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10}} />
-                    <YAxis yAxisId="right" orientation="right" axisLine={false} tickLine={false} tick={{fill: '#60a5fa', fontSize: 10}} />
-                    <Tooltip />
-                    <Legend verticalAlign="top" wrapperStyle={{ fontSize: '10px', textTransform: 'uppercase' }} />
-                    <Bar yAxisId="left" dataKey="ebitda" name="EBITDA" fill="#1e3a8a" radius={[4, 4, 0, 0]} />
-                    <Line yAxisId="right" type="monotone" dataKey="revenue" name="Tekjur" stroke="#60a5fa" strokeWidth={3} dot={{ r: 4 }} />
-                  </ComposedChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
